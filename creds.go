@@ -8,7 +8,7 @@
 //      return err
 //  }
 //  // adjust config setting timeouts, database name, etc:
-//  // see https://godoc.org/github.com/go-sql-driver/mysql#Config
+//  // see https://pkg.go.dev/github.com/go-sql-driver/mysql#Config
 //  cfg.DBName = "data"
 //  connector, err := mysql.NewConnector(cfg) // package github.com/go-sql-driver/mysql
 //  if err != nil {
@@ -22,26 +22,26 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/go-sql-driver/mysql"
 )
 
 // Config is a shortcut function that creates AWS SDK session and fetches MySQL
 // credentials from specific AWS Secrets Manager profile.
 func Config(ctx context.Context, profile string) (*mysql.Config, error) {
-	sess, err := session.NewSession()
+	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
-	svc := secretsmanager.New(sess)
+	svc := secretsmanager.NewFromConfig(cfg)
 	return ConfigFromSecrets(ctx, svc, profile)
 }
 
 // ConfigFromSecrets fetches MySQL credentials from specific AWS Secrets
-// Manager profile using provided SecretsManager SDK service instance.
-func ConfigFromSecrets(ctx context.Context, svc *secretsmanager.SecretsManager, profile string) (*mysql.Config, error) {
-	res, err := svc.GetSecretValueWithContext(ctx, &secretsmanager.GetSecretValueInput{
+// Manager profile using provided SecretsManager AWS SDK client.
+func ConfigFromSecrets(ctx context.Context, svc *secretsmanager.Client, profile string) (*mysql.Config, error) {
+	res, err := svc.GetSecretValue(ctx, &secretsmanager.GetSecretValueInput{
 		SecretId: &profile,
 	})
 	if err != nil {
