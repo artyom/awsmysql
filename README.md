@@ -16,4 +16,4 @@ Usage example:
     }
     db := sql.OpenDB(connector)
 
-More details at: <https://pkg.go.dev/github.com/artyom/awsmysql>
+More details at: <https://pkg.go.dev/github.com/artyom/awsmysql/v2>
