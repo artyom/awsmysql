@@ -20,6 +20,7 @@ package awsmysql
 import (
 	"context"
 	"encoding/json"
+	"net"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -57,7 +58,8 @@ func ConfigFromSecrets(ctx context.Context, svc *secretsmanager.Client, profile 
 		return nil, err
 	}
 	cfg := mysql.NewConfig()
-	cfg.Addr, cfg.Net = creds.Host+":"+strconv.Itoa(creds.Port), "tcp"
+	cfg.Net = "tcp"
+	cfg.Addr = net.JoinHostPort(creds.Host, strconv.Itoa(creds.Port))
 	cfg.User, cfg.Passwd = creds.User, creds.Pass
 	return cfg, nil
 }
